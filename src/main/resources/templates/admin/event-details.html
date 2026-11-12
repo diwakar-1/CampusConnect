@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Event Overview - ' + ${event.title})}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: adminSidebar('events')}"></div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- HEADER -->
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <a th:href="@{/admin/events}" class="text-muted small text-decoration-none mb-1 d-inline-block">
+                            <i class="bi bi-arrow-left me-1"></i> Back to All Events
+                        </a>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h3 class="fw-bold text-white mb-0" th:text="${event.title}">Event Title</h3>
+                            <span class="badge" th:classappend="${event.status.name() == 'UPCOMING'} ? 'badge-status-upcoming' : (${event.status.name() == 'ONGOING'} ? 'badge-status-ongoing' : 'badge-status-completed')" th:text="${event.status}">UPCOMING</span>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            Category: <strong class="text-white" th:text="${event.category.name}">Category</strong> &bull;
+                            Venue: <strong class="text-white" th:text="${event.venueDisplayName}">Venue</strong>
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3 mt-md-0">
+                        <a th:href="@{'/admin/events/edit/' + ${event.id}}" class="btn btn-outline-glass">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                        <a th:href="@{'/admin/reports/registrations.csv?eventId=' + ${event.id}}" class="btn btn-brand">
+                            <i class="bi bi-download me-1"></i> Export Registrations CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EVENT STATS ROW -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Registrations</div>
+                        <div class="h3 fw-bold text-white mb-0">
+                            <span th:text="${event.currentRegistrations}">20</span> / <span th:text="${event.maxCapacity}">100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Verified Attendance</div>
+                        <div class="h3 fw-bold text-success mb-0" th:text="${attendances.size()}">15</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Student Rating</div>
+                        <div class="h3 fw-bold text-warning mb-0" th:text="${averageRating} + ' ★'">4.8 ★</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small text-uppercase fw-bold mb-1">Fee &amp; Type</div>
+                        <div class="h3 fw-bold text-white mb-0" th:text="${event.registrationFee == 0 ? 'FREE' : '₹' + event.registrationFee}">FREE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS FOR SESSIONS, REGISTRATIONS, ATTENDANCE & FEEDBACK -->
+            <ul class="nav nav-tabs border-secondary border-opacity-25 mb-4" id="eventTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active text-white" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules-pane" type="button">
+                        <i class="bi bi-clock-history me-1"></i> Schedule Sessions (<span th:text="${schedules.size()}">0</span>)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link text-white" id="registrations-tab" data-bs-toggle="tab" data-bs-target="#registrations-pane" type="button">
+                        <i class="bi bi-people me-1"></i> Registrations (<span th:text="${registrations.size()}">0</span>)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link text-white" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane" type="button">
+                        <i class="bi bi-star me-1"></i> Participant Feedback (<span th:text="${feedbacks.size()}">0</span>)
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="eventTabContent">
+                <!-- TAB 1: SESSIONS & SCHEDULES -->
+                <div class="tab-pane fade show active" id="schedules-pane" role="tabpanel">
+                    <div class="glass-panel p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Event Sessions</h5>
+                            <button type="button" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#addSessionModal">
+                                <i class="bi bi-plus-lg me-1"></i> Add Session
+                            </button>
+                        </div>
+
+                        <div th:if="${schedules.isEmpty()}" class="text-center py-4 text-muted small">
+                            No sessions added yet. Click "Add Session" to define session timings and venues.
+                        </div>
+
+                        <div th:if="${!schedules.isEmpty()}" class="table-responsive">
+                            <table class="table table-dark-custom align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Session Title</th>
+                                        <th>Timings</th>
+                                        <th>Venue</th>
+                                        <th>Coordinator</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="s : ${schedules}">
+                                        <td>
+                                            <div class="fw-bold text-white" th:text="${s.sessionTitle}">Title</div>
+                                            <div class="text-muted small" th:text="${s.sessionDescription}">Description</div>
+                                        </td>
+                                        <td>
+                                            <span class="text-white small" th:text="${#temporals.format(s.startTime, 'dd MMM, hh:mm a')} + ' – ' + ${#temporals.format(s.endTime, 'hh:mm a')}">Time</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small" th:text="${s.venueDisplayName}">Venue</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small" th:text="${s.coordinatorName != null ? s.coordinatorName : 'N/A'}">Coord</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <form th:action="@{'/admin/schedules/delete/' + ${s.id}}" method="post" onsubmit="return confirm('Remove this session?');">
+                                                <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                                <input type="hidden" name="eventId" th:value="${event.id}"/>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: REGISTRATIONS -->
+                <div class="tab-pane fade" id="registrations-pane" role="tabpanel">
+                    <div class="glass-panel p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Registered Participants</h5>
+                            <a th:href="@{'/admin/reports/registrations.csv?eventId=' + ${event.id}}" class="btn btn-sm btn-outline-glass">
+                                <i class="bi bi-download me-1"></i> Export List
+                            </a>
+                        </div>
+
+                        <div th:if="${registrations.isEmpty()}" class="text-center py-4 text-muted small">
+                            No participants have registered for this event yet.
+                        </div>
+
+                        <div th:if="${!registrations.isEmpty()}" class="table-responsive">
+                            <table class="table table-dark-custom align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>College</th>
+                                        <th>Pass ID</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="r : ${registrations}">
+                                        <td>
+                                            <div class="fw-bold text-white" th:text="${r.user.fullName}">Name</div>
+                                            <div class="text-muted small" th:text="${r.user.email}">Email</div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small" th:text="${r.user.effectiveCollegeName}">College</span>
+                                        </td>
+                                        <td>
+                                            <span class="font-monospace text-primary small fw-bold" th:text="${r.registrationNumber}">CC-2026</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${r.registrationType}">INDIVIDUAL</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" th:classappend="${r.status.name() == 'CONFIRMED'} ? 'bg-success' : (${r.status.name() == 'WAITLISTED'} ? 'bg-warning text-dark' : 'bg-danger')"
+                                                  th:text="${r.status}">CONFIRMED</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex gap-1">
+                                                <!-- Manual Attendance Button -->
+                                                <form th:action="@{'/admin/attendance/manual/' + ${r.id}}" method="post">
+                                                    <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                                    <input type="hidden" name="eventId" th:value="${event.id}"/>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Mark Present">
+                                                        <i class="bi bi-check2-circle"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Issue Certificate Button -->
+                                                <form th:action="@{'/admin/certificates/issue/' + ${r.id}}" method="post">
+                                                    <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                                    <input type="hidden" name="eventId" th:value="${event.id}"/>
+                                                    <input type="hidden" name="type" value="PARTICIPATION"/>
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Issue Certificate">
+                                                        <i class="bi bi-award"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: FEEDBACK -->
+                <div class="tab-pane fade" id="feedback-pane" role="tabpanel">
+                    <div class="glass-panel p-4 mb-4">
+                        <h5 class="fw-bold text-white mb-3">Feedback Reviews</h5>
+
+                        <div th:if="${feedbacks.isEmpty()}" class="text-center py-4 text-muted small">
+                            No feedback reviews submitted yet.
+                        </div>
+
+                        <div th:if="${!feedbacks.isEmpty()}" class="d-flex flex-column gap-3">
+                            <div th:each="fb : ${feedbacks}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="fw-bold text-white small" th:text="${fb.user.fullName}">Student</div>
+                                    <div class="text-warning small" th:text="${'★'.repeat(fb.overallRating)}">★★★★★</div>
+                                </div>
+                                <div class="text-muted small mb-2" th:text="${fb.user.effectiveCollegeName}">College</div>
+                                <p class="text-white-50 small mb-0" th:text="${fb.comments}">Comments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD SESSION MODAL -->
+<div class="modal fade" id="addSessionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-panel border border-secondary border-opacity-50">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title text-white fw-bold">Add Schedule Session</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/admin/schedules/new}" th:object="${newSchedule}" method="post">
+                <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                <input type="hidden" name="eventId" th:value="${event.id}"/>
+
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label">Session Title *</label>
+                        <input type="text" th:field="*{sessionTitle}" class="form-control" placeholder="e.g. Round 1 / Keynote Speech" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea th:field="*{sessionDescription}" rows="2" class="form-control" placeholder="Brief outline of the session"></textarea>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Start Time *</label>
+                            <input type="datetime-local" th:field="*{startTime}" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">End Time *</label>
+                            <input type="datetime-local" th:field="*{endTime}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Venue (With Conflict Detection)</label>
+                        <select th:field="*{venueId}" class="form-select">
+                            <option value="">Use Event Venue</option>
+                            <option th:each="v : ${venues}" th:value="${v.id}" th:text="${v.displayName}">Auditorium</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Session Coordinator</label>
+                        <input type="text" th:field="*{coordinatorName}" class="form-control" placeholder="Coordinator name">
+                    </div>
+                </div>
+
+                <div class="modal-footer border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-sm btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-brand">Save Session</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('404 - Not Found')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+<main class="py-5 d-flex align-items-center">
+    <div class="container text-center py-5">
+        <div class="glass-panel p-5 max-w-lg mx-auto" style="max-width: 540px;">
+            <div class="stat-icon bg-warning bg-opacity-15 text-warning mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.5rem;">
+                <i class="bi bi-question-circle"></i>
+            </div>
+            <h1 class="display-6 fw-bold text-white mb-2" th:text="${errorTitle != null ? errorTitle : 'Page Not Found'}">Page Not Found</h1>
+            <p class="text-muted mb-4" th:text="${errorMessage != null ? errorMessage : 'The requested event, registration, or schedule could not be located.'}">
+                The requested resource could not be found.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{/}" class="btn btn-outline-glass"><i class="bi bi-house me-1"></i> Home</a>
+                <a th:href="@{/events}" class="btn btn-brand"><i class="bi bi-calendar3 me-1"></i> Browse Events</a>
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

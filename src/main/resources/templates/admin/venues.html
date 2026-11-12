@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Venue Management')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: adminSidebar('venues')}"></div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h3 class="fw-bold text-white mb-1">Campus Venues &amp; Facilities</h3>
+                        <p class="text-muted small mb-0">Manage auditoriums, seminar halls, computer labs and sports grounds at CGC Mohali</p>
+                    </div>
+                    <div class="mt-3 mt-md-0">
+                        <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#newVenueModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Campus Venue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div th:each="v : ${venues}" class="col-lg-4 col-md-6">
+                    <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold text-white mb-0" th:text="${v.name}">Venue Name</h5>
+                                <span class="badge" th:classappend="${v.active} ? 'bg-success' : 'bg-secondary'" th:text="${v.active} ? 'Active' : 'Inactive'">Active</span>
+                            </div>
+
+                            <div class="text-primary small mb-3">
+                                <i class="bi bi-building me-1"></i> <span th:text="${v.building}">Building</span>
+                                <span th:if="${v.roomNumber != null}" th:text="' &bull; ' + ${v.roomNumber}">Room 101</span>
+                            </div>
+
+                            <div class="p-3 mb-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 small text-muted">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Max Capacity:</span>
+                                    <strong class="text-white" th:text="${v.capacity} + ' seats'">500 seats</strong>
+                                </div>
+                                <div th:if="${v.facilities != null}">
+                                    <span>Facilities:</span>
+                                    <div class="text-white-50 mt-1" th:text="${v.facilities}">AV, Sound, AC</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-dim small pt-2 border-top border-secondary border-opacity-25">
+                            <i class="bi bi-shield-check text-success me-1"></i> Conflict Detection Enabled
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD VENUE MODAL -->
+<div class="modal fade" id="newVenueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-panel border border-secondary border-opacity-50">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title text-white fw-bold">Add Campus Venue</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/admin/venues/new}" th:object="${newVenue}" method="post">
+                <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label">Venue Name *</label>
+                        <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. CGC Main Auditorium" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-8">
+                            <label class="form-label">Building / Block</label>
+                            <input type="text" th:field="*{building}" class="form-control" placeholder="e.g. Admin Block A">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Room / Floor</label>
+                            <input type="text" th:field="*{roomNumber}" class="form-control" placeholder="Room 201">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Seating Capacity *</label>
+                        <input type="number" th:field="*{capacity}" min="10" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Available Facilities</label>
+                        <input type="text" th:field="*{facilities}" class="form-control" placeholder="e.g. 4K Projector, Surround Audio, High-speed Wi-Fi, AC">
+                    </div>
+                </div>
+
+                <div class="modal-footer border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-sm btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-brand">Create Venue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

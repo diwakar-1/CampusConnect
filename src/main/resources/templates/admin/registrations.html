@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('All Registrations')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: adminSidebar('registrations')}"></div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h3 class="fw-bold text-white mb-1">Campus Event Registrations</h3>
+                        <p class="text-muted small mb-0">Master database of all internal and external event participants across CGC Mohali</p>
+                    </div>
+                    <div class="mt-3 mt-md-0 d-flex gap-2">
+                        <a th:href="@{/admin/reports/registrations.csv}" class="btn btn-brand">
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Full CSV
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Event Filter Bar -->
+                <form th:action="@{/admin/registrations}" method="get" class="row g-2 mt-3 pt-3 border-top border-secondary border-opacity-25">
+                    <div class="col-md-6">
+                        <select name="eventId" class="form-select" onchange="this.form.submit()">
+                            <option value="">Filter by Event (All Events)</option>
+                            <option th:each="ev : ${events}" th:value="${ev.id}" th:text="${ev.title}" th:selected="${selectedEventId == ev.id}">Event Title</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" th:if="${selectedEventId != null}">
+                        <a th:href="@{/admin/registrations}" class="btn btn-outline-glass w-100">Reset Filter</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="glass-panel p-4">
+                <div th:if="${registrations == null or registrations.isEmpty()}" class="text-center py-5 text-muted small">
+                    <i class="bi bi-card-checklist fs-1 d-block mb-2 text-dim"></i>
+                    No registrations found.
+                </div>
+
+                <div th:if="${registrations != null and !registrations.isEmpty()}" class="table-responsive">
+                    <table class="table table-dark-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Pass ID</th>
+                                <th>Student</th>
+                                <th>College</th>
+                                <th>Event</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="r : ${registrations}">
+                                <td>
+                                    <span class="font-monospace text-primary fw-bold small" th:text="${r.registrationNumber}">CC-2026-001</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-white" th:text="${r.user.fullName}">Name</div>
+                                    <div class="text-muted small" th:text="${r.user.email}">Email</div>
+                                </td>
+                                <td>
+                                    <span class="text-muted small" th:text="${r.user.effectiveCollegeName}">CGC Mohali</span>
+                                </td>
+                                <td>
+                                    <span class="text-white small fw-semibold" th:text="${r.event.title}">Event Title</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${r.registrationType}">INDIVIDUAL</span>
+                                </td>
+                                <td>
+                                    <span class="badge" th:classappend="${r.status.name() == 'CONFIRMED'} ? 'bg-success' : (${r.status.name() == 'WAITLISTED'} ? 'bg-warning text-dark' : 'bg-danger')"
+                                          th:text="${r.status}">CONFIRMED</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small" th:text="${#temporals.format(r.registeredAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

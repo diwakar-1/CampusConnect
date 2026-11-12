@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head(${event.title})}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container">
+        <!-- Toast / Flash messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i> <span th:text="${warningMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- EVENT HERO BANNER -->
+        <div class="glass-panel overflow-hidden mb-5">
+            <div class="position-relative" style="height: 320px;">
+                <img th:src="${event.bannerImageUrl != null ? event.bannerImageUrl : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80'}"
+                     alt="Event Banner" class="w-100 h-100 object-fit-cover">
+                <div class="position-absolute bottom-0 start-0 w-100 p-4 p-md-5" style="background: linear-gradient(0deg, rgba(7, 10, 19, 0.95) 0%, transparent 100%);">
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="badge bg-primary" th:text="${event.category.name}">Category</span>
+                        <span class="badge" th:classappend="${event.status.name() == 'UPCOMING'} ? 'badge-status-upcoming' : (${event.status.name() == 'ONGOING'} ? 'badge-status-ongoing' : 'badge-status-completed')" th:text="${event.status}">UPCOMING</span>
+                        <span class="badge bg-secondary" th:text="${event.visibility.name() == 'ALL'} ? 'INTER-COLLEGE EVENT' : (${event.visibility.name() == 'INTERNAL_ONLY'} ? 'CGC MOHALI ONLY' : 'EXTERNAL ONLY')">Visibility</span>
+                    </div>
+                    <h1 class="display-6 fw-bold text-white mb-0" th:text="${event.title}">Event Title</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- LEFT COLUMN: Description, Sessions, Feedback -->
+            <div class="col-lg-8">
+                <!-- Description -->
+                <div class="glass-panel p-4 p-md-5 mb-4">
+                    <h4 class="fw-bold text-white mb-3">About This Event</h4>
+                    <p class="text-muted" style="white-space: pre-line; line-height: 1.7;" th:text="${event.description}">
+                        Detailed description text...
+                    </p>
+
+                    <div th:if="${event.eligibilityRequirements != null and !event.eligibilityRequirements.isBlank()}" class="mt-4 p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                        <h6 class="fw-bold text-white mb-1"><i class="bi bi-shield-check text-info me-2"></i> Eligibility &amp; Guidelines</h6>
+                        <p class="text-muted small mb-0" th:text="${event.eligibilityRequirements}">Eligibility requirements...</p>
+                    </div>
+                </div>
+
+                <!-- Event Sessions / Schedule Timeline -->
+                <div class="glass-panel p-4 p-md-5 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold text-white mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Event Schedule &amp; Sessions</h4>
+                        <span class="badge bg-secondary" th:text="${schedules.size()} + ' Sessions'">2 Sessions</span>
+                    </div>
+
+                    <div th:if="${schedules == null or schedules.isEmpty()}" class="text-center py-4 text-muted small">
+                        <i class="bi bi-calendar-event fs-3 d-block mb-2"></i>
+                        No detailed session agenda posted yet. Sessions will appear here soon.
+                    </div>
+
+                    <div th:if="${schedules != null and !schedules.isEmpty()}" class="d-flex flex-column gap-3">
+                        <div th:each="s : ${schedules}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+                                <h6 class="fw-bold text-white mb-1" th:text="${s.sessionTitle}">Session Title</h6>
+                                <div class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span th:text="${#temporals.format(s.startTime, 'dd MMM, hh:mm a')} + ' – ' + ${#temporals.format(s.endTime, 'hh:mm a')}">Time</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-2" th:text="${s.sessionDescription}">Session description...</p>
+                            <div class="d-flex flex-wrap gap-3 text-muted small">
+                                <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span th:text="${s.venueDisplayName}">Venue</span></span>
+                                <span th:if="${s.coordinatorName != null}"><i class="bi bi-person-fill text-info me-1"></i> <span th:text="${s.coordinatorName}">Coordinator</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews & Student Feedback -->
+                <div class="glass-panel p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="fw-bold text-white mb-0"><i class="bi bi-chat-heart text-danger me-2"></i> Participant Reviews</h4>
+                            <div class="text-muted small mt-1">
+                                <span class="text-warning fw-bold fs-5" th:text="${averageRating} + ' ★'">4.8 ★</span>
+                                <span class="ms-1">(Based on <span th:text="${feedbacks.size()}">10</span> reviews)</span>
+                            </div>
+                        </div>
+
+                        <!-- Feedback submission button if attended/completed -->
+                        <div th:if="${isRegistered and !hasSubmittedFeedback}">
+                            <a th:href="@{'/feedback/submit/' + ${event.id}}" class="btn btn-sm btn-outline-glass">
+                                <i class="bi bi-pencil-square me-1"></i> Write Review
+                            </a>
+                        </div>
+                    </div>
+
+                    <div th:if="${feedbacks == null or feedbacks.isEmpty()}" class="text-center py-4 text-muted small">
+                        <i class="bi bi-chat-square-text fs-3 d-block mb-2"></i>
+                        No student reviews yet for this event.
+                    </div>
+
+                    <div th:if="${feedbacks != null and !feedbacks.isEmpty()}" class="d-flex flex-column gap-3">
+                        <div th:each="fb : ${feedbacks}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary bg-opacity-25 text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 700; font-size: 0.8rem;">
+                                        <span th:text="${#strings.substring(fb.user.fullName, 0, 1)}">U</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white small" th:text="${fb.user.fullName}">Student Name</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;" th:text="${fb.user.effectiveCollegeName}">College Name</div>
+                                    </div>
+                                </div>
+                                <div class="text-warning small">
+                                    <span th:text="${'★'.repeat(fb.overallRating)}">★★★★★</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-0" th:text="${fb.comments}">Comments...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Registration Card & Key Information -->
+            <div class="col-lg-4">
+                <!-- REGISTRATION ACTION CARD -->
+                <div class="glass-panel p-4 mb-4 sticky-top" style="top: 90px; z-index: 10;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small text-uppercase fw-bold">Registration Status</span>
+                        <span th:if="${event.isRegistrationOpen()}" class="badge bg-success">OPEN</span>
+                        <span th:if="${!event.isRegistrationOpen()}" class="badge bg-danger">CLOSED</span>
+                    </div>
+
+                    <!-- Entry Fee -->
+                    <div class="display-6 fw-bold text-white mb-2" th:text="${event.registrationFee == 0 ? 'FREE ENTRY' : '₹' + event.registrationFee}">
+                        FREE
+                    </div>
+
+                    <!-- Capacity indicator -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between text-muted small mb-1">
+                            <span>Capacity: <span th:text="${event.currentRegistrations}">0</span> / <span th:text="${event.maxCapacity}">100</span></span>
+                            <span th:if="${event.isFull()}" class="text-danger fw-bold">Full (Waitlist)</span>
+                            <span th:if="${!event.isFull()}" class="text-success fw-bold" th:text="${event.availableSpots} + ' spots left'">80 left</span>
+                        </div>
+                        <div class="progress" style="height: 6px; background: rgba(255,255,255,0.08);">
+                            <div class="progress-bar bg-primary" role="progressbar"
+                                 th:style="'width: ' + ${(event.currentRegistrations * 100.0) / event.maxCapacity} + '%'"></div>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BUTTONS BASED ON STATE -->
+                    <div sec:authorize="!isAuthenticated()" class="d-grid gap-2">
+                        <a th:href="@{/auth/login}" class="btn btn-brand py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Log In to Register
+                        </a>
+                        <div class="text-center text-muted small mt-1">
+                            New user? <a th:href="@{/auth/register/internal}" class="text-primary text-decoration-none">CGC</a> or <a th:href="@{/auth/register/external}" class="text-info text-decoration-none">External</a>
+                        </div>
+                    </div>
+
+                    <div sec:authorize="isAuthenticated()">
+                        <!-- If already registered -->
+                        <div th:if="${isRegistered}" class="p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 text-center">
+                            <i class="bi bi-check-circle-fill text-success fs-3 mb-2 d-block"></i>
+                            <h6 class="text-white fw-bold mb-1">You Are Registered!</h6>
+                            <p class="text-muted small mb-3">
+                                Pass Number: <strong class="text-white" th:text="${userRegistration != null ? userRegistration.registrationNumber : 'CONFIRMED'}">CC-2026-001</strong>
+                            </p>
+                            <a th:href="@{/student/registrations}" class="btn btn-sm btn-brand w-100">
+                                <i class="bi bi-qr-code me-1"></i> View Attendance Pass
+                            </a>
+                        </div>
+
+                        <!-- If NOT registered and registration is open -->
+                        <div th:if="${!isRegistered and event.isRegistrationOpen()}" class="d-grid gap-2">
+                            <!-- Individual Register Form -->
+                            <form th:action="@{'/events/' + ${event.id} + '/register'}" method="post">
+                                <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                <button type="submit" class="btn btn-brand w-100 py-2">
+                                    <i class="bi bi-ticket-perforated me-2"></i> Register As Individual
+                                </button>
+                            </form>
+
+                            <!-- Team Register Button (if allowed) -->
+                            <div th:if="${event.allowTeamRegistration}">
+                                <a th:href="@{'/events/' + ${event.id} + '/team-register'}" class="btn btn-outline-glass w-100 py-2">
+                                    <i class="bi bi-people me-2"></i> Register As Team (<span th:text="${event.minTeamSize} + '–' + ${event.maxTeamSize} + ' members'">2-4</span>)
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- If registration closed -->
+                        <div th:if="${!isRegistered and !event.isRegistrationOpen()}" class="alert alert-secondary text-center small mb-0">
+                            <i class="bi bi-lock me-1"></i> Registration for this event is currently closed.
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary border-opacity-25 my-4">
+
+                    <!-- QUICK EVENT METRICS -->
+                    <div class="d-flex flex-column gap-3 text-muted small">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-primary bg-opacity-10 text-primary fs-5" style="width: 38px; height: 38px;">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div>
+                                <span class="d-block text-white fw-bold">Date &amp; Time</span>
+                                <span th:text="${#temporals.format(event.startDate, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-danger bg-opacity-10 text-danger fs-5" style="width: 38px; height: 38px;">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <div>
+                                <span class="d-block text-white fw-bold">Venue &amp; Hall</span>
+                                <span th:text="${event.venueDisplayName}">Venue</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-warning bg-opacity-10 text-warning fs-5" style="width: 38px; height: 38px;">
+                                <i class="bi bi-hourglass-bottom"></i>
+                            </div>
+                            <div>
+                                <span class="d-block text-white fw-bold">Registration Deadline</span>
+                                <span th:text="${#temporals.format(event.registrationDeadline, 'dd MMM yyyy, hh:mm a')}">Deadline</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-info bg-opacity-10 text-info fs-5" style="width: 38px; height: 38px;">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div>
+                                <span class="d-block text-white fw-bold">Event Coordinator</span>
+                                <span th:text="${event.coordinatorName}">Coordinator</span>
+                                <div class="text-dim" style="font-size: 0.75rem;" th:text="${event.coordinatorEmail} + ' • ' + ${event.coordinatorPhone}">Contact</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

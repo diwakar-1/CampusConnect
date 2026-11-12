@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('QR Attendance Scanner')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: adminSidebar('attendance')}"></div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h3 class="fw-bold text-white mb-1"><i class="bi bi-qr-code-scan text-primary me-2"></i> QR Attendance Desk</h3>
+                        <p class="text-muted small mb-0">Scan student digital passes to verify registration, record check-in timestamps, and prevent duplicate attendance</p>
+                    </div>
+
+                    <!-- Event Selector -->
+                    <div class="mt-3 mt-md-0" style="min-width: 280px;">
+                        <form th:action="@{/admin/attendance}" method="get" id="eventSelectForm">
+                            <select name="eventId" id="scannerEventSelect" class="form-select" onchange="document.getElementById('eventSelectForm').submit()">
+                                <option th:each="ev : ${events}" th:value="${ev.id}" th:text="${ev.title}" th:selected="${selectedEventId == ev.id}">Event Title</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCANNER WORKSPACE -->
+            <div class="row g-4 mb-4">
+                <!-- SCANNER INPUT CARD -->
+                <div class="col-lg-5">
+                    <div class="glass-panel p-4 h-100">
+                        <h5 class="fw-bold text-white mb-3">Live Pass Scanner</h5>
+                        <p class="text-muted small">
+                            Point your barcode / QR code reader at the student pass or enter the Pass ID manually below.
+                        </p>
+
+                        <!-- Live result banner (driven by JS) -->
+                        <div id="scanResultAlert" class="alert d-none mb-3 py-2 small"></div>
+
+                        <form th:action="@{/admin/attendance/scan}" th:object="${scanDto}" method="post" id="scanForm">
+                            <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                            <input type="hidden" name="eventId" th:value="${selectedEventId}"/>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="scannerQrInput">Pass Code / Scanned QR Payload</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-surface border-secondary border-opacity-25 text-primary"><i class="bi bi-upc-scan"></i></span>
+                                    <input type="text" id="scannerQrInput" name="qrCode" class="form-control font-monospace"
+                                           placeholder="e.g. CC-2026-003-8821" autocomplete="off" required>
+                                </div>
+                                <div class="text-dim small mt-1" style="font-size: 0.72rem;">Press Enter to immediately verify and mark attendance.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-brand w-100 py-2">
+                                <i class="bi bi-patch-check me-1"></i> Verify &amp; Mark Present
+                            </button>
+                        </form>
+
+                        <!-- QUICK DEMO SCANNER BUTTONS -->
+                        <div class="p-3 mt-4 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                            <span class="text-muted small fw-bold text-uppercase d-block mb-2" style="font-size: 0.7rem;">Quick Test Pass Code</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button th:if="${!registrations.isEmpty()}" type="button" class="btn btn-sm btn-outline-glass small"
+                                        th:onclick="'document.getElementById(\'scannerQrInput\').value=\'' + ${registrations[0].registrationNumber} + '\';'">
+                                    Insert Pass: <span class="font-monospace text-primary" th:text="${registrations[0].registrationNumber}">CC-2026</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVENT ATTENDANCE METRICS -->
+                <div class="col-lg-7">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Live Check-In Roster</h5>
+                            <span class="badge bg-success" th:text="${attendances.size()} + ' Present'">1 Present</span>
+                        </div>
+
+                        <div th:if="${registrations.isEmpty()}" class="text-center py-4 text-muted small">
+                            No registered participants for this event yet.
+                        </div>
+
+                        <div th:if="${!registrations.isEmpty()}" class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                            <table class="table table-dark-custom align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Pass ID</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Manual Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="r : ${registrations}">
+                                        <td>
+                                            <div class="fw-bold text-white small" th:text="${r.user.fullName}">Name</div>
+                                            <div class="text-muted" style="font-size: 0.72rem;" th:text="${r.user.effectiveCollegeName}">College</div>
+                                        </td>
+                                        <td>
+                                            <span class="font-monospace text-primary small" th:text="${r.registrationNumber}">CC-2026</span>
+                                        </td>
+                                        <td>
+                                            <!-- Check attendance status -->
+                                            <span th:each="att : ${attendances}" th:if="${att.eventRegistration.id == r.id}" class="badge bg-success">
+                                                <i class="bi bi-check2"></i> PRESENT
+                                            </span>
+                                            <span th:if="${!#lists.contains(attendances.![eventRegistration.id], r.id)}" class="badge bg-secondary">
+                                                PENDING
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div th:if="${!#lists.contains(attendances.![eventRegistration.id], r.id)}">
+                                                <form th:action="@{'/admin/attendance/manual/' + ${r.id}}" method="post">
+                                                    <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                                    <input type="hidden" name="eventId" th:value="${selectedEventId}"/>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" title="Mark Present">
+                                                        <i class="bi bi-check-lg"></i> Mark
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div th:if="${#lists.contains(attendances.![eventRegistration.id], r.id)}">
+                                                <i class="bi bi-patch-check-fill text-success fs-5"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/qr-scanner.js}"></script>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

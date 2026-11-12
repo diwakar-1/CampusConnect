@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Contact Us')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container py-lg-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 mb-2">Helpdesk &amp; Inquiries</span>
+                <h1 class="fw-bold text-white">Get in Touch with the Event Team</h1>
+                <p class="text-muted lead">Have queries regarding inter-college participation, team registrations, or certificates?</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="fw-bold text-white mb-3">Event Coordination Office</h5>
+                            <p class="text-muted small">Reach out directly to the Student Welfare Department at CGC University Mohali.</p>
+
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary fs-5 mt-1">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1 small fw-bold">Location</h6>
+                                    <span class="text-muted small">Admin Block A, 2nd Floor, CGC University Mohali, Landran, Greater Mohali, Punjab 140307</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success fs-5 mt-1">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1 small fw-bold">Phone Support</h6>
+                                    <span class="text-muted small">+91 172 3984200 / +91 98765 43210</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="stat-icon bg-info bg-opacity-10 text-info fs-5 mt-1">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1 small fw-bold">Email Inquiries</h6>
+                                    <span class="text-muted small">events@cgc.edu.in / campusconnect@cgc.edu.in</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-top border-secondary border-opacity-25 mt-4">
+                            <span class="text-muted small">Looking for immediate account approval? External student verification is handled within 24 hours on business days.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="glass-panel p-4 p-md-5">
+                        <h5 class="fw-bold text-white mb-3">Send a Message</h5>
+                        <form onsubmit="event.preventDefault(); alert('Thank you! Your message has been submitted to the CGC Event Helpdesk.'); this.reset();">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" placeholder="Your name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" placeholder="your.email@college.edu" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">College / Organization</label>
+                                <input type="text" class="form-control" placeholder="e.g. CGC Mohali, Thapar, Chitkara...">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Message / Inquiry</label>
+                                <textarea rows="4" class="form-control" placeholder="Describe your question or issue..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-brand w-100">
+                                <i class="bi bi-send me-2"></i> Submit Inquiry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

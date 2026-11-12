@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Notifications Center')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container py-lg-4">
+        <div class="max-w-3xl mx-auto" style="max-width: 800px;">
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h3 class="fw-bold text-white mb-1"><i class="bi bi-bell text-primary me-2"></i> Notifications &amp; Alerts</h3>
+                        <p class="text-muted small mb-0">Updates regarding your event registrations, schedule alerts, approvals, and certificates</p>
+                    </div>
+                    <div class="mt-3 mt-md-0" th:if="${notifications != null and !notifications.isEmpty()}">
+                        <form th:action="@{/notifications/read-all}" method="post">
+                            <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-glass">
+                                <i class="bi bi-check-all me-1"></i> Mark All as Read
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${notifications == null or notifications.isEmpty()}" class="glass-panel p-5 text-center">
+                <i class="bi bi-bell-slash fs-1 text-dim d-block mb-2"></i>
+                <h5 class="text-white fw-bold mb-1">No Notifications</h5>
+                <p class="text-muted small mb-0">You are completely up to date.</p>
+            </div>
+
+            <div th:if="${notifications != null and !notifications.isEmpty()}" class="d-flex flex-column gap-3">
+                <div th:each="n : ${notifications}" class="glass-panel p-3 p-md-4" th:style="${n.read} ? 'opacity: 0.75;' : 'border-left: 4px solid #6366f1;'">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="stat-icon mt-1"
+                             th:classappend="${n.type == 'SUCCESS'} ? 'bg-success bg-opacity-15 text-success' : (${n.type == 'WARNING'} ? 'bg-danger bg-opacity-15 text-danger' : (${n.type == 'CERTIFICATE'} ? 'bg-warning bg-opacity-15 text-warning' : 'bg-primary bg-opacity-15 text-primary'))"
+                             style="width: 44px; height: 44px; min-width: 44px; font-size: 1.3rem;">
+                            <i class="bi" th:classappend="${n.type == 'SUCCESS'} ? 'bi-check-circle-fill' : (${n.type == 'WARNING'} ? 'bi-exclamation-octagon-fill' : (${n.type == 'CERTIFICATE'} ? 'bi-award-fill' : 'bi-info-circle-fill'))"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="fw-bold text-white mb-0" th:text="${n.title}">Notification Title</h6>
+                                <span class="text-muted" style="font-size: 0.72rem;" th:text="${#temporals.format(n.createdAt, 'dd MMM, hh:mm a')}">Time</span>
+                            </div>
+                            <p class="text-muted small mb-2" th:text="${n.message}">Notification message details...</p>
+
+                            <div class="d-flex gap-2 align-items-center">
+                                <a th:if="${n.linkUrl != null}" th:href="${n.linkUrl}" class="btn btn-sm btn-outline-glass py-1 px-3 small">
+                                    View Details &rarr;
+                                </a>
+
+                                <form th:if="${!n.read}" th:action="@{'/notifications/read/' + ${n.id}}" method="post">
+                                    <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                    <button type="submit" class="btn btn-sm btn-link text-muted small p-0 text-decoration-none">
+                                        Mark as read
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

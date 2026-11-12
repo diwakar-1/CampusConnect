@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Admin Dashboard & Analytics')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <!-- Admin Sidebar -->
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: adminSidebar('dashboard')}"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <!-- Toast messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- DASHBOARD HEADER -->
+            <div class="glass-panel p-4 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">Admin Portal</span>
+                            <span class="text-muted small">CGC University Mohali</span>
+                        </div>
+                        <h3 class="fw-bold text-white mb-0">Campus Analytics &amp; Control Center</h3>
+                    </div>
+                    <div class="d-flex gap-2 mt-3 mt-md-0">
+                        <a th:href="@{/admin/events/new}" class="btn btn-brand">
+                            <i class="bi bi-plus-lg me-1"></i> Create Event
+                        </a>
+                        <a th:href="@{/admin/attendance}" class="btn btn-outline-glass">
+                            <i class="bi bi-qr-code-scan me-1"></i> Scan Attendance
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KEY STATS ROW 1 -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Total Users</span>
+                            <div class="stat-icon bg-primary bg-opacity-15 text-primary">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                        <div class="h2 fw-bold text-white mb-1" th:text="${stats.totalUsers}">120</div>
+                        <div class="text-muted small">
+                            <span class="text-primary fw-bold" th:text="${stats.internalStudents}">100</span> CGC &bull;
+                            <span class="text-info fw-bold" th:text="${stats.externalStudents}">20</span> External
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Pending Approvals</span>
+                            <div class="stat-icon bg-warning bg-opacity-15 text-warning">
+                                <i class="bi bi-person-exclamation"></i>
+                            </div>
+                        </div>
+                        <div class="h2 fw-bold text-warning mb-1" th:text="${stats.pendingApprovals}">3</div>
+                        <div class="text-muted small">
+                            <a th:href="@{/admin/external-approvals}" class="text-warning text-decoration-none">Review applications &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Event Registrations</span>
+                            <div class="stat-icon bg-success bg-opacity-15 text-success">
+                                <i class="bi bi-ticket-detailed-fill"></i>
+                            </div>
+                        </div>
+                        <div class="h2 fw-bold text-white mb-1" th:text="${stats.totalRegistrations}">45</div>
+                        <div class="text-muted small">
+                            Across <span th:text="${stats.totalEvents}">5</span> total events
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Attendance Rate</span>
+                            <div class="stat-icon bg-info bg-opacity-15 text-info">
+                                <i class="bi bi-qr-code"></i>
+                            </div>
+                        </div>
+                        <div class="h2 fw-bold text-white mb-1" th:text="${stats.attendanceRate} + '%'">85.5%</div>
+                        <div class="text-muted small">
+                            Avg. Rating: <span class="text-warning fw-bold" th:text="${stats.averageRating} + ' ★'">4.8 ★</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS CHARTS -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold text-white mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i> Registrations Per Event</h5>
+                            <a th:href="@{/admin/reports/registrations.csv}" class="btn btn-sm btn-outline-glass">
+                                <i class="bi bi-download me-1"></i> Export CSV
+                            </a>
+                        </div>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="eventRegistrationsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="glass-panel p-4 h-100">
+                        <h5 class="fw-bold text-white mb-4"><i class="bi bi-pie-chart text-info me-2"></i> Category Mix</h5>
+                        <div style="height: 280px; position: relative;">
+                            <canvas id="categoryDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PENDING APPROVALS & RECENT REGISTRATIONS -->
+            <div class="row g-4">
+                <!-- Pending Approvals Action Widget -->
+                <div class="col-lg-6">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="fw-bold text-white mb-0">External Student Approvals</h5>
+                                <span class="badge bg-warning text-dark" th:text="${pendingApprovals.size()}">0</span>
+                            </div>
+                            <a th:href="@{/admin/external-approvals}" class="text-primary text-decoration-none small">Manage all &rarr;</a>
+                        </div>
+
+                        <div th:if="${pendingApprovals == null or pendingApprovals.isEmpty()}" class="text-center py-4 text-muted small">
+                            <i class="bi bi-check2-all fs-1 text-success d-block mb-2"></i>
+                            All external student registrations have been reviewed. No pending approvals!
+                        </div>
+
+                        <div th:if="${pendingApprovals != null and !pendingApprovals.isEmpty()}" class="d-flex flex-column gap-3">
+                            <div th:each="p : ${pendingApprovals}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-white small" th:text="${p.fullName}">Applicant Name</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        <span th:text="${p.externalCollegeName != null ? p.externalCollegeName : 'External College'}">College</span> &bull;
+                                        <span th:text="${p.email}">email</span>
+                                    </div>
+                                    <div class="text-dim" style="font-size: 0.7rem;" th:text="'ID: ' + ${p.rollNumber != null ? p.rollNumber : 'N/A'}">Roll</div>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <form th:action="@{'/admin/external-approvals/' + ${p.id} + '/approve'}" method="post">
+                                        <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                        <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                    <form th:action="@{'/admin/external-approvals/' + ${p.id} + '/reject'}" method="post">
+                                        <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Registrations -->
+                <div class="col-lg-6">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Recent Event Registrations</h5>
+                            <a th:href="@{/admin/registrations}" class="text-primary text-decoration-none small">View all &rarr;</a>
+                        </div>
+
+                        <div th:if="${recentRegistrations == null or recentRegistrations.isEmpty()}" class="text-center py-4 text-muted small">
+                            No registrations recorded yet.
+                        </div>
+
+                        <div th:if="${recentRegistrations != null and !recentRegistrations.isEmpty()}" class="d-flex flex-column gap-2">
+                            <div th:each="r : ${recentRegistrations}" class="p-2 px-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-white small" th:text="${r.user.fullName}">Student</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;" th:text="${r.event.title}">Event</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge" th:classappend="${r.status.name() == 'CONFIRMED'} ? 'bg-success' : 'bg-warning text-dark'"
+                                          th:text="${r.status}">CONFIRMED</span>
+                                    <div class="text-muted font-monospace" style="font-size: 0.68rem;" th:text="${r.registrationNumber}">CC-2026</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart initialization script -->
+<script th:src="@{/js/charts.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function () {
+        const regData = /*[[${regChartData}]]*/ { labels: [], data: [] };
+        const catData = /*[[${catChartData}]]*/ { labels: [], data: [] };
+        initAdminCharts(regData, catData);
+    });
+    /*]]>*/
+</script>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

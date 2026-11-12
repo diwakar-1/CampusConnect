@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Team Registration - ' + ${event.title})}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container py-lg-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="glass-panel p-4 p-md-5">
+                    <div class="mb-4">
+                        <a th:href="@{'/events/' + ${event.id}}" class="text-muted small text-decoration-none mb-2 d-inline-block">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Event Details
+                        </a>
+                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 d-block mb-2" style="width: fit-content;">Team Entry</span>
+                        <h2 class="fw-bold text-white mb-1" th:text="${event.title}">Event Title</h2>
+                        <p class="text-muted small">
+                            Team size requirement: <strong class="text-white" th:text="${event.minTeamSize} + ' to ' + ${event.maxTeamSize} + ' members'">2 to 4 members</strong> (including Team Leader).
+                        </p>
+                    </div>
+
+                    <div th:if="${errorMessage}" class="alert alert-danger py-2 small" th:text="${errorMessage}"></div>
+
+                    <form th:action="@{'/events/' + ${event.id} + '/team-register'}" th:object="${registrationDto}" method="post">
+                        <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" th:value="${_csrf != null ? _csrf.token : ''}"/>
+
+                        <!-- Team Name -->
+                        <div class="mb-4">
+                            <label class="form-label">Team Name *</label>
+                            <input type="text" th:field="*{teamName}" class="form-control" placeholder="e.g. ByteBusters, Team Innovate" required>
+                            <div class="text-muted small mt-1">Choose a unique team name for the leaderboard and participation records.</div>
+                        </div>
+
+                        <!-- Team Leader (Current User) -->
+                        <div class="p-3 mb-4 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary">Team Leader (You)</span>
+                                <span class="text-muted small"><i class="bi bi-lock-fill"></i> Primary Point of Contact</span>
+                            </div>
+                            <div class="row g-2 text-muted small">
+                                <div class="col-md-6"><strong class="text-white">Name:</strong> <span th:text="${currentUser.fullName}">Rahul Sharma</span></div>
+                                <div class="col-md-6"><strong class="text-white">Email:</strong> <span th:text="${currentUser.email}">rahul@cgc.edu.in</span></div>
+                                <div class="col-md-6"><strong class="text-white">College:</strong> <span th:text="${currentUser.effectiveCollegeName}">CGC Mohali</span></div>
+                                <div class="col-md-6"><strong class="text-white">ID:</strong> <span th:text="${currentUser.rollNumber != null ? currentUser.rollNumber : 'N/A'}">2023CSE1042</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Team Members Container -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Team Members</h5>
+                            <button type="button" id="addTeamMemberBtn" class="btn btn-sm btn-outline-glass">
+                                <i class="bi bi-person-plus-fill me-1"></i> Add Another Member
+                            </button>
+                        </div>
+
+                        <div id="teamMembersContainer" th:data-max="${event.maxTeamSize}">
+                            <!-- Initial Member Row -->
+                            <div class="team-member-row p-3 mb-3 rounded-3 glass-panel">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-secondary">Team Member #2</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Full Name *</label>
+                                        <input type="text" name="teamMembers[0].fullName" required class="form-control" placeholder="Member full name">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email Address *</label>
+                                        <input type="email" name="teamMembers[0].email" required class="form-control" placeholder="member@college.edu">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Roll Number / Student ID</label>
+                                        <input type="text" name="teamMembers[0].rollNumber" class="form-control" placeholder="Roll No.">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">College / University</label>
+                                        <input type="text" name="teamMembers[0].collegeName" class="form-control" th:placeholder="${currentUser.effectiveCollegeName}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Contact Number</label>
+                                        <input type="tel" name="teamMembers[0].phone" class="form-control" placeholder="Phone">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top border-secondary border-opacity-25 mt-4">
+                            <button type="submit" class="btn btn-brand w-100 py-2">
+                                <i class="bi bi-check2-circle me-1"></i> Complete Team Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

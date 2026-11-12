@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('About Us')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container py-lg-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-5">
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 mb-2">About The Platform</span>
+                <h1 class="fw-bold text-white">CampusConnect @ CGC University Mohali</h1>
+                <p class="text-muted lead">The centralized hub powering premier collegiate events, hackathons, and symposiums.</p>
+            </div>
+
+            <div class="glass-panel p-4 p-md-5 mb-4">
+                <h4 class="fw-bold text-white mb-3">Our Mission</h4>
+                <p class="text-muted">
+                    At CGC University Mohali, we believe extracurricular innovation, hackathons, cultural fests, and athletic competitions are integral to holistic student leadership. CampusConnect was engineered from the ground up using Java Spring Boot 3 and modern web technologies to streamline event administration, participant registration, venue scheduling, QR-based check-ins, and verified credentialing.
+                </p>
+                <div class="row g-4 mt-2">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 text-center">
+                            <i class="bi bi-shield-check text-success fs-2 mb-2"></i>
+                            <h6 class="text-white fw-bold">Verified Identities</h6>
+                            <p class="text-muted small mb-0">Role-based controls for both internal CGC scholars and approved external colleges.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 text-center">
+                            <i class="bi bi-qr-code-scan text-primary fs-2 mb-2"></i>
+                            <h6 class="text-white fw-bold">Zero-Paper Attendance</h6>
+                            <p class="text-muted small mb-0">Real-time attendance scanning preventing duplicate entry and proxy markings.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 text-center">
+                            <i class="bi bi-award text-warning fs-2 mb-2"></i>
+                            <h6 class="text-white fw-bold">Instant Certificates</h6>
+                            <p class="text-muted small mb-0">Automated PDF generation with public cryptographic QR verification.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 p-md-5">
+                <h4 class="fw-bold text-white mb-3">Campus Address &amp; Administration</h4>
+                <div class="row g-3 text-muted">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong class="text-white">Institution:</strong> CGC University Mohali</p>
+                        <p class="mb-1"><strong class="text-white">Campus:</strong> Landran, Sector 112, Greater Mohali, Punjab 140307</p>
+                        <p class="mb-1"><strong class="text-white">Email:</strong> events@cgc.edu.in</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong class="text-white">Directorate:</strong> Department of Student Welfare &amp; Academic Affairs</p>
+                        <p class="mb-1"><strong class="text-white">Toll-free Helpdesk:</strong> 1800 200 3575</p>
+                        <p class="mb-1"><strong class="text-white">Hours:</strong> Monday – Saturday, 9:00 AM – 5:00 PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

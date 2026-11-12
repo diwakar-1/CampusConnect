@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Student Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <!-- Student Sidebar -->
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: studentSidebar('dashboard')}"></div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <!-- Toast messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- WELCOME HEADER BANNER -->
+            <div class="glass-panel p-4 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.12) 100%);">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge" th:classappend="${user.isInternalStudent()} ? 'bg-primary' : 'bg-info'"
+                                  th:text="${user.isInternalStudent()} ? 'CGC UNIVERSITY MOHALI' : 'EXTERNAL PARTICIPANT'">CGC Mohali</span>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Active Student</span>
+                        </div>
+                        <h2 class="fw-bold text-white mb-1">
+                            Welcome back, <span th:text="${user.fullName}">Rahul Sharma</span>!
+                        </h2>
+                        <p class="text-muted small mb-0">
+                            College: <strong class="text-white" th:text="${user.effectiveCollegeName}">CGC University Mohali</strong>
+                            <span th:if="${user.rollNumber != null}" th:text="' &bull; Roll No: ' + ${user.rollNumber}"></span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a th:href="@{/events}" class="btn btn-brand">
+                            <i class="bi bi-plus-circle me-1"></i> Explore New Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="glass-panel p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Registrations</span>
+                            <i class="bi bi-ticket-detailed text-primary fs-4"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0" th:text="${registrations.size()}">2</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-panel p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Attendance</span>
+                            <i class="bi bi-patch-check text-success fs-4"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0" th:text="${attendances.size()}">1</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-panel p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Certificates</span>
+                            <i class="bi bi-award text-warning fs-4"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0" th:text="${certificates.size()}">1</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="glass-panel p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small text-uppercase fw-bold">Sessions</span>
+                            <i class="bi bi-clock-history text-info fs-4"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0" th:text="${schedules.size()}">2</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REGISTERED EVENTS & PASSES -->
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">My Active Event Passes</h5>
+                            <a th:href="@{/student/registrations}" class="text-primary text-decoration-none small">View all &rarr;</a>
+                        </div>
+
+                        <div th:if="${registrations == null or registrations.isEmpty()}" class="text-center py-4 text-muted small">
+                            <i class="bi bi-ticket-perforated fs-1 d-block mb-2 text-dim"></i>
+                            You have not registered for any events yet.
+                            <div class="mt-2">
+                                <a th:href="@{/events}" class="btn btn-sm btn-outline-glass">Discover Events</a>
+                            </div>
+                        </div>
+
+                        <div th:if="${registrations != null and !registrations.isEmpty()}" class="d-flex flex-column gap-3">
+                            <div th:each="r : ${recentRegistrations}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-1 bg-white rounded-2 d-none d-sm-block">
+                                        <img th:src="${r.qrCodeData}" alt="QR" width="48" height="48">
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-white mb-1" th:text="${r.event.title}">Event Title</h6>
+                                        <div class="text-muted small">
+                                            <span>Pass: <strong class="text-white" th:text="${r.registrationNumber}">CC-2026</strong></span>
+                                            &bull;
+                                            <span th:text="${#temporals.format(r.event.startDate, 'dd MMM yyyy')}">Date</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge" th:classappend="${r.status.name() == 'CONFIRMED'} ? 'bg-success' : (${r.status.name() == 'WAITLISTED'} ? 'bg-warning text-dark' : 'bg-danger')"
+                                          th:text="${r.status}">CONFIRMED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERSONAL SCHEDULE -->
+                <div class="col-lg-5">
+                    <div class="glass-panel p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-white mb-0">Upcoming Sessions</h5>
+                            <a th:href="@{/student/schedules}" class="text-primary text-decoration-none small">Timeline &rarr;</a>
+                        </div>
+
+                        <div th:if="${schedules == null or schedules.isEmpty()}" class="text-center py-4 text-muted small">
+                            <i class="bi bi-clock fs-1 d-block mb-2 text-dim"></i>
+                            No sessions scheduled for your registered events.
+                        </div>
+
+                        <div th:if="${schedules != null and !schedules.isEmpty()}" class="d-flex flex-column gap-3">
+                            <div th:each="s : ${schedules}" class="p-3 rounded-3 bg-body bg-opacity-50 border border-secondary border-opacity-25">
+                                <div class="fw-bold text-white small mb-1" th:text="${s.sessionTitle}">Session Title</div>
+                                <div class="text-muted small mb-1" style="font-size: 0.75rem;" th:text="${s.event.title}">Event</div>
+                                <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.72rem;">
+                                    <span><i class="bi bi-clock me-1 text-primary"></i> <span th:text="${#temporals.format(s.startTime, 'hh:mm a')}">Time</span></span>
+                                    <span><i class="bi bi-geo-alt me-1 text-danger"></i> <span th:text="${s.venueDisplayName}">Venue</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

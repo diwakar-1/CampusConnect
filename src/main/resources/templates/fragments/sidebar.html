@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Admin Sidebar Fragment -->
+<div th:fragment="adminSidebar(activeTab)" class="sidebar p-3 d-flex flex-column">
+    <div class="px-3 py-2 mb-3 border-bottom border-secondary border-opacity-25">
+        <span class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.1em;">Admin Console</span>
+    </div>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a th:href="@{/admin/dashboard}" class="nav-link" th:classappend="${activeTab == 'dashboard'} ? 'active' : ''">
+                <i class="bi bi-speedometer2"></i> Analytics Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/events}" class="nav-link" th:classappend="${activeTab == 'events'} ? 'active' : ''">
+                <i class="bi bi-calendar-event"></i> Manage Events
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/external-approvals}" class="nav-link" th:classappend="${activeTab == 'approvals'} ? 'active' : ''">
+                <i class="bi bi-person-check"></i> External Approvals
+                <span th:if="${stats != null and stats.pendingApprovals > 0}" th:text="${stats.pendingApprovals}" class="badge bg-warning text-dark ms-auto">2</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/registrations}" class="nav-link" th:classappend="${activeTab == 'registrations'} ? 'active' : ''">
+                <i class="bi bi-card-checklist"></i> All Registrations
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/attendance}" class="nav-link" th:classappend="${activeTab == 'attendance'} ? 'active' : ''">
+                <i class="bi bi-qr-code-scan"></i> QR Attendance Scanner
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/certificates}" class="nav-link" th:classappend="${activeTab == 'certificates'} ? 'active' : ''">
+                <i class="bi bi-award"></i> Certificate Manager
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/feedback}" class="nav-link" th:classappend="${activeTab == 'feedback'} ? 'active' : ''">
+                <i class="bi bi-star"></i> Student Feedback
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/venues}" class="nav-link" th:classappend="${activeTab == 'venues'} ? 'active' : ''">
+                <i class="bi bi-geo-alt"></i> Venues & Locations
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/students}" class="nav-link" th:classappend="${activeTab == 'students'} ? 'active' : ''">
+                <i class="bi bi-people"></i> Students Directory
+            </a>
+        </li>
+    </ul>
+    <div class="pt-3 border-top border-secondary border-opacity-25 mt-auto">
+        <a th:href="@{/events}" class="btn btn-sm btn-outline-glass w-100 text-start">
+            <i class="bi bi-arrow-up-right-square me-2"></i> Public Event Catalog
+        </a>
+    </div>
+</div>
+
+<!-- Student Sidebar Fragment -->
+<div th:fragment="studentSidebar(activeTab)" class="sidebar p-3 d-flex flex-column">
+    <div class="px-3 py-2 mb-3 border-bottom border-secondary border-opacity-25">
+        <span class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.1em;">Student Workspace</span>
+    </div>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a th:href="@{/student/dashboard}" class="nav-link" th:classappend="${activeTab == 'dashboard'} ? 'active' : ''">
+                <i class="bi bi-house-door"></i> Student Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/student/registrations}" class="nav-link" th:classappend="${activeTab == 'registrations'} ? 'active' : ''">
+                <i class="bi bi-ticket-detailed"></i> Passes & Registrations
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/student/schedules}" class="nav-link" th:classappend="${activeTab == 'schedules'} ? 'active' : ''">
+                <i class="bi bi-clock-history"></i> My Event Schedule
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/student/attendance}" class="nav-link" th:classappend="${activeTab == 'attendance'} ? 'active' : ''">
+                <i class="bi bi-patch-check"></i> Attendance Record
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/student/certificates}" class="nav-link" th:classappend="${activeTab == 'certificates'} ? 'active' : ''">
+                <i class="bi bi-award"></i> My Certificates
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/student/profile}" class="nav-link" th:classappend="${activeTab == 'profile'} ? 'active' : ''">
+                <i class="bi bi-person-gear"></i> Profile & College Details
+            </a>
+        </li>
+    </ul>
+    <div class="pt-3 border-top border-secondary border-opacity-25 mt-auto">
+        <a th:href="@{/events}" class="btn btn-sm btn-brand w-100">
+            <i class="bi bi-plus-circle me-1"></i> Browse More Events
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
+

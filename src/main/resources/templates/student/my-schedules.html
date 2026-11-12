@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('My Schedule')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container-fluid px-lg-5">
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 px-0 d-none d-lg-block">
+            <div th:replace="~{fragments/sidebar :: studentSidebar('schedules')}"></div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10 py-4 px-md-4">
+            <div class="glass-panel p-4 mb-4">
+                <h3 class="fw-bold text-white mb-1">My Event Schedule</h3>
+                <p class="text-muted small mb-0">Personalized timeline of workshops, keynotes, and competition rounds for your registered events</p>
+            </div>
+
+            <div th:if="${schedules == null or schedules.isEmpty()}" class="glass-panel p-5 text-center">
+                <i class="bi bi-calendar-event fs-1 text-muted mb-3 d-block"></i>
+                <h5 class="text-white fw-bold mb-1">No Scheduled Sessions</h5>
+                <p class="text-muted small mb-3">You do not have any sessions scheduled yet. Check back once event agendas are published.</p>
+                <a th:href="@{/events}" class="btn btn-sm btn-brand">Browse Events</a>
+            </div>
+
+            <div th:if="${schedules != null and !schedules.isEmpty()}" class="d-flex flex-column gap-3">
+                <div th:each="s : ${schedules}" class="glass-panel p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 border-end-md border-secondary border-opacity-25 mb-3 mb-md-0">
+                            <div class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 mb-2">
+                                <i class="bi bi-calendar3 me-1"></i> <span th:text="${#temporals.format(s.startTime, 'dd MMM yyyy')}">Date</span>
+                            </div>
+                            <div class="fw-bold text-white fs-5">
+                                <span th:text="${#temporals.format(s.startTime, 'hh:mm a')}">09:00 AM</span>
+                            </div>
+                            <div class="text-muted small">to <span th:text="${#temporals.format(s.endTime, 'hh:mm a')}">11:00 AM</span></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3 mb-md-0 ps-md-4">
+                            <span class="badge bg-secondary mb-1" th:text="${s.event.title}">Event Title</span>
+                            <h5 class="fw-bold text-white mb-2" th:text="${s.sessionTitle}">Session Title</h5>
+                            <p class="text-muted small mb-0" th:text="${s.sessionDescription}">Session description...</p>
+                        </div>
+
+                        <div class="col-md-3 text-md-end">
+                            <div class="text-white small fw-bold mb-1">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> <span th:text="${s.venueDisplayName}">Venue</span>
+                            </div>
+                            <div th:if="${s.coordinatorName != null}" class="text-muted small">
+                                <i class="bi bi-person me-1"></i> <span th:text="${s.coordinatorName}">Coordinator</span>
+                            </div>
+                            <div class="mt-2">
+                                <a th:href="@{'/events/' + ${s.event.id}}" class="btn btn-sm btn-outline-glass">Event Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+

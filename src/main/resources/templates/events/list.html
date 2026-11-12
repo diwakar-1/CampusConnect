@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Discover Events')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<main class="py-5">
+    <div class="container">
+        <!-- HEADER & FILTERS -->
+        <div class="glass-panel p-4 mb-5">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-4">
+                    <h3 class="fw-bold text-white mb-1">Campus Events Catalog</h3>
+                    <p class="text-muted small mb-0">Browse workshops, hackathons, and fests at CGC Mohali</p>
+                </div>
+
+                <div class="col-lg-8">
+                    <form th:action="@{/events}" method="get" class="row g-2">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-surface border-secondary border-opacity-25 text-muted"><i class="bi bi-search"></i></span>
+                                <input type="text" name="keyword" th:value="${selectedKeyword}" class="form-control" placeholder="Search events by title or keyword...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${selectedCategory == cat.id}">Category</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="UPCOMING" th:selected="${selectedStatus?.name() == 'UPCOMING'}">Upcoming</option>
+                                <option value="ONGOING" th:selected="${selectedStatus?.name() == 'ONGOING'}">Ongoing</option>
+                                <option value="COMPLETED" th:selected="${selectedStatus?.name() == 'COMPLETED'}">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 d-flex gap-1">
+                            <button type="submit" class="btn btn-brand w-100"><i class="bi bi-funnel"></i> Filter</button>
+                            <a th:href="@{/events}" class="btn btn-outline-glass" title="Reset"><i class="bi bi-arrow-clockwise"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVENT CARDS GRID -->
+        <div th:if="${events == null or events.isEmpty()}" class="glass-panel p-5 text-center my-4">
+            <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="text-white fw-bold mb-1">No Events Found</h5>
+            <p class="text-muted small mb-3">No campus events match your selected filters. Try broadening your search.</p>
+            <a th:href="@{/events}" class="btn btn-sm btn-outline-glass">View All Events</a>
+        </div>
+
+        <div th:if="${events != null and !events.isEmpty()}" class="row g-4">
+            <div th:each="ev : ${events}" class="col-lg-4 col-md-6">
+                <div class="glass-panel glass-panel-hoverable h-100 d-flex flex-column overflow-hidden">
+                    <div class="position-relative" style="height: 195px;">
+                        <img th:src="${ev.bannerImageUrl != null ? ev.bannerImageUrl : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80'}"
+                             alt="Poster" class="w-100 h-100 object-fit-cover">
+
+                        <!-- Status Badge -->
+                        <span class="position-absolute top-0 start-0 m-3 badge"
+                              th:classappend="${ev.status.name() == 'UPCOMING'} ? 'badge-status-upcoming' : (${ev.status.name() == 'ONGOING'} ? 'badge-status-ongoing' : (${ev.status.name() == 'COMPLETED'} ? 'badge-status-completed' : 'badge-status-cancelled'))"
+                              th:text="${ev.status}">
+                            UPCOMING
+                        </span>
+
+                        <!-- Visibility Badge -->
+                        <span class="position-absolute top-0 end-0 m-3 badge"
+                              th:classappend="${ev.visibility.name() == 'ALL'} ? 'bg-success' : (${ev.visibility.name() == 'INTERNAL_ONLY'} ? 'bg-primary' : 'bg-info')"
+                              th:text="${ev.visibility.name() == 'ALL'} ? 'INTER-COLLEGE' : (${ev.visibility.name() == 'INTERNAL_ONLY'} ? 'CGC ONLY' : 'EXTERNAL ONLY')">
+                            Inter-College
+                        </span>
+
+                        <!-- Category Pill -->
+                        <span class="position-absolute bottom-0 start-0 m-3 badge bg-dark bg-opacity-75 backdrop-blur">
+                            <i class="bi bi-tag-fill me-1" th:style="'color: ' + ${ev.category.colorHex}"></i>
+                            <span th:text="${ev.category.name}">Tech</span>
+                        </span>
+                    </div>
+
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex align-items-center text-muted small mb-2 gap-3">
+                            <span><i class="bi bi-calendar4-event me-1 text-primary"></i> <span th:text="${#temporals.format(ev.startDate, 'dd MMM yyyy, hh:mm a')}">Date</span></span>
+                        </div>
+                        <div class="text-muted small mb-3">
+                            <i class="bi bi-geo-alt me-1 text-danger"></i> <span th:text="${ev.venueDisplayName}">Venue</span>
+                        </div>
+
+                        <h5 class="fw-bold text-white mb-2" th:text="${ev.title}">Event Title</h5>
+                        <p class="text-muted small mb-4 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" th:text="${ev.description}">
+                            Description...
+                        </p>
+
+                        <!-- Capacity Bar -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                <span>Spots Filled: <strong class="text-white" th:text="${ev.currentRegistrations}">20</strong> / <span th:text="${ev.maxCapacity}">100</span></span>
+                                <span th:if="${ev.isFull()}" class="badge bg-danger">FULL (Waitlist)</span>
+                                <span th:if="${!ev.isFull()}" class="badge bg-success" th:text="${ev.availableSpots} + ' left'">80 left</span>
+                            </div>
+                            <div class="progress" style="height: 5px; background: rgba(255,255,255,0.06);">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                     th:style="'width: ' + ${(ev.currentRegistrations * 100.0) / ev.maxCapacity} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center mt-auto">
+                            <div>
+                                <span class="text-muted small">Registration:</span>
+                                <span class="fw-bold text-white ms-1" th:text="${ev.registrationFee == 0 ? 'FREE' : '₹' + ev.registrationFee}">FREE</span>
+                            </div>
+                            <a th:href="@{'/events/' + ${ev.id}}" class="btn btn-sm btn-brand">
+                                View Event <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+
